@@ -1,0 +1,73 @@
+# assume all repositories are to be added previously.
+
+#!/bin/sh
+
+package_check()
+{
+
+for package in nginx mysql php5-fpm php5-mysql	
+	do	
+	echo "Checking '$package' installation. wait"
+	sleep 1
+	hash $package 2> /dev/null;
+	if [ ! $? = 0 ]; then
+		echo "Installing '$package'. wait"
+		echo
+		sleep 1;		
+		sudo apt-get update 1> /dev/null;
+		if [ $package = 'mysql' ]; then
+			sudo apt-get -y install mysql-server;
+		else
+			sudo apt-get -y install $package;
+		fi
+		echo "Installed"
+	else		
+		echo "Installed"
+		echo
+	fi
+        done
+       user_domain
+}
+
+user_domain()
+{
+	echo -n "Please enter a Domain Name:";
+	read domain_name;
+	sudo sh -c "echo 127.0.0.1 $domain_name >> /etc/hosts";
+	echo
+	echo "$domain_name entry created in /etc/hosts"
+	
+	wordpress_fun
+	
+}
+
+# idon't know about the nginx server so i was ignore that lines ...
+
+wordpress_fun()
+{
+	echo "Downloading the wordpress packages"
+	sudo wget http://wordpress.org/latest.zip -O /var/www/$domain_name/latest.zip 1> /dev/null;
+	sudo unzip /var/www/$domain_name/latest.zip -d /var/www/$domain_name/ 1> /dev/null;
+ 	echo "package downloaded & save"
+	mydatabase
+}
+
+mydatabase()
+{
+	echo "Creating mysql database $db_name";
+	read db_name	
+	echo -n "Please enter MySql username:"
+	read username;
+	echo -n "Please enter MySql password:"
+	read password	
+	mysql -u $username -p$password  "CREATE DATABASE $db_name;"
+	if [ ! $? = 0 ]; then
+	
+		echo "Username/Password Incorrect.. try again"
+	
+	else
+	echo "$db_name created..Ok"
+	
+}
+
+# next task i dont know how to make config file .
